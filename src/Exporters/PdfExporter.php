@@ -39,8 +39,10 @@ class PdfExporter implements ExporterInterface
     protected function generateHtml(array $data, array $options): string
     {
         $title = $options['title'] ?? 'Document';
+        $font = $options['font'] ?? 'DejaVu Sans';
+        
         $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><style>';
-        $html .= 'body { font-family: "DejaVu Sans", sans-serif; }';
+        $html .= 'body { font-family: "' . $font . '", sans-serif; }';
         $html .= 'table { width: 100%; border-collapse: collapse; }';
         $html .= 'th, td { border: 1px solid #000; padding: 8px; text-align: left; }';
         $html .= 'thead { background-color: #f2f2f2; }';
