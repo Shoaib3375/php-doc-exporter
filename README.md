@@ -61,16 +61,9 @@ private function getExtension($format) {
 
 ---
 
-## 🔒 Security & API Tokens
-The package includes a built-in `Config` class to manage sensitive API tokens.
+## 🔒 Security & API Tokens (Optional)
+The package includes an **optional** `Config` class for API token authentication. This is only needed if you're exposing document generation through an API and want to control access.
 
-### Configuration
-Store your tokens in your `.env` file for security:
-
-```env
-DOC_EXPORTER_MAIN_TOKEN=903352ea22c8ab26bf76ee18a452b3377d2a7d5c
-DOC_EXPORTER_SAFE_TOKEN=5de6f212bc0320ed82a4eeb914115b9f450625f6
-```
 
 ### Usage
 ```php
