@@ -7,11 +7,11 @@ An all-in-one PHP/Laravel library to generate professional documents in **PDF, E
 
 ## 🚀 Features
 - **Blade Template Support**: Use Laravel Blade views for custom PDF layouts
-- **Bangla Support**: Seamlessly handles Bangla Unicode characters in PDFs using `DejaVu Sans`.
-- **Multi-Format**: One interface for 4 major document types.
-- **Secure**: Built-in logic for Main and Safe API tokens for external integrations.
-- **Performant**: Optimized for speed and minimal memory footprint.
-- **API Ready**: Perfect for REST APIs with token-based authentication
+  - **Bangla Support**: Seamlessly handles Bangla Unicode characters in PDFs using `DejaVu Sans`.
+  - **Multi-Format**: One interface for 4 major document types.
+  - **Secure**: Built-in logic for Main and Safe API tokens for external integrations.
+  - **Performant**: Optimized for speed and minimal memory footprint.
+  - **API Ready**: Perfect for REST APIs with token-based authentication
 
 ---
 
@@ -197,9 +197,9 @@ $content = $exporter->exportFromView('pdf', 'invoice', [
 
 ### Benefits
 - **Custom Layouts**: Design complex documents with full HTML/CSS control
-- **Reusable Templates**: Share templates across your application
-- **Dynamic Content**: Use Blade directives (@if, @foreach, @include)
-- **Bangla Support**: Full Unicode support in templates
+  - **Reusable Templates**: Share templates across your application
+  - **Dynamic Content**: Use Blade directives (@if, @foreach, @include)
+  - **Bangla Support**: Full Unicode support in templates
 
 ---
 
@@ -269,17 +269,30 @@ if ($config->canAccessSafeApi($token)) {
 ## 🇧🇩 Bangla Unicode Support
 All formats (PDF, Excel, Word, CSV) fully support Bangla and other Unicode characters.
 
-**PDF** uses `DejaVu Sans` font by default to render Bangla correctly (no boxes or question marks).
+**Important:** For full Bangla support in PDFs, use a dedicated Bangla font like **Noto Sans Bengali**, **Kalpurush**, or **SolaimanLipi**. The default `DejaVu Sans` has limited Bangla character support.
 
+### Recommended Usage
 ```php
 $data = [
     ['নাম' => 'শোয়েব', 'বয়স' => '২৫', 'শহর' => 'ঢাকা'],
     ['নাম' => 'মাইনুল', 'বয়স' => '৩০', 'শহর' => 'সিলেট']
 ];
 
-$content = $exporter->export('pdf', $data);
+// Specify a Bangla-compatible font
+$content = $exporter->export('pdf', $data, [
+    'font' => 'Noto Sans Bengali'  // or 'Kalpurush', 'SolaimanLipi'
+]);
 file_put_contents('bangla-report.pdf', $content);
 ```
+
+### In Blade Templates
+```blade
+<style>
+    body { font-family: 'Noto Sans Bengali', sans-serif; }
+</style>
+```
+
+> **Note:** See [BANGLA_FONT_GUIDE.md](BANGLA_FONT_GUIDE.md) for detailed font installation and configuration instructions.
 
 ---
 
@@ -292,13 +305,13 @@ Generates PDF from Blade template (Laravel only).
 
 **Parameters:**
 - `$format` - Currently only `'pdf'` supported for views
-- `$view` - Blade view name (e.g., `'invoice'` for `resources/views/invoice.blade.php`)
-- `$data` - Data to pass to the Blade view
-- `$options` - Optional settings:
-  - `paper` - PDF paper size (A4, Letter, Legal)
-  - `orientation` - PDF orientation (portrait, landscape)
-  - `font` - PDF font (default: DejaVu Sans)
-- `$token` - Optional API token for validation
+  - `$view` - Blade view name (e.g., `'invoice'` for `resources/views/invoice.blade.php`)
+  - `$data` - Data to pass to the Blade view
+  - `$options` - Optional settings:
+    - `paper` - PDF paper size (A4, Letter, Legal)
+    - `orientation` - PDF orientation (portrait, landscape)
+    - `font` - PDF font (default: DejaVu Sans)
+  - `$token` - Optional API token for validation
 
 **Returns:** PDF content as string
 
@@ -311,13 +324,13 @@ Generates document content and returns as string.
 
 **Parameters:**
 - `$format` - Format type: `'pdf'`, `'excel'`, `'word'`, `'csv'`
-- `$data` - Associative array of data (keys = headers)
-- `$options` - Optional settings:
-  - `title` - Document title
-  - `paper` - PDF paper size (A4, Letter, Legal)
-  - `orientation` - PDF orientation (portrait, landscape)
-  - `font` - PDF font (default: DejaVu Sans)
-- `$token` - Optional API token for validation
+  - `$data` - Associative array of data (keys = headers)
+  - `$options` - Optional settings:
+    - `title` - Document title
+    - `paper` - PDF paper size (A4, Letter, Legal)
+    - `orientation` - PDF orientation (portrait, landscape)
+    - `font` - PDF font (default: DejaVu Sans)
+  - `$token` - Optional API token for validation
 
 **Returns:** Document content as string
 
