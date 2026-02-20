@@ -47,5 +47,21 @@
                 "Shoaib3375\\PhpDocExporter\\PhpDocExporterServiceProvider"
             ]
         }
+    },
+    "archive": {
+        "exclude": [
+            "/tests",
+            "/examples",
+            "/.gitignore",
+            "/.phpunit.result.cache",
+            "/phpunit.xml",
+            "/ARCHITECTURE.md",
+            "/BLADE_API_GUIDE.md",
+            "/IMPLEMENTATION_SUMMARY.md",
+            "/IMPLEMENTATION_COMPLETE.md",
+            "/TESTING_GUIDE.md",
+            "/QUICK_REFERENCE.md",
+            "/DOCUMENTATION_INDEX.md"
+        ]
     }
 }
