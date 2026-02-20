@@ -6,10 +6,12 @@
 An all-in-one PHP/Laravel library to generate professional documents in **PDF, Excel, Word, and CSV** formats with specialized support for **Bangla Unicode** and built-in **API Token Security**.
 
 ## 🚀 Features
+- **Blade Template Support**: Use Laravel Blade views for custom PDF layouts
 - **Bangla Support**: Seamlessly handles Bangla Unicode characters in PDFs using `DejaVu Sans`.
 - **Multi-Format**: One interface for 4 major document types.
 - **Secure**: Built-in logic for Main and Safe API tokens for external integrations.
 - **Performant**: Optimized for speed and minimal memory footprint.
+- **API Ready**: Perfect for REST APIs with token-based authentication
 
 ---
 
@@ -90,6 +92,114 @@ private function getMimeType($format) {
     };
 }
 ```
+
+### Using Blade Templates (NEW)
+```php
+use Shoaib3375\PhpDocExporter\DocumentExporter;
+
+public function exportInvoice(Request $request)
+{
+    $data = [
+        'title' => 'Sales Invoice',
+        'invoiceNumber' => 'INV-2024-001',
+        'customerName' => 'মোহাম্মদ শোয়েব',
+        'items' => [
+            ['name' => 'Product A', 'quantity' => 2, 'price' => 500],
+            ['name' => 'পণ্য বি', 'quantity' => 1, 'price' => 1000],
+        ],
+        'total' => 2000
+    ];
+
+    $exporter = new DocumentExporter();
+    $content = $exporter->exportFromView('pdf', 'invoice', $data, [
+        'paper' => 'A4',
+        'orientation' => 'portrait'
+    ]);
+
+    return response($content)
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', 'attachment; filename="invoice.pdf"');
+}
+```
+
+### API with Token Authentication
+```php
+Route::middleware('auth:sanctum')->post('/export/invoice', function (Request $request) {
+    $token = $request->bearerToken();
+    
+    $data = ['title' => 'Invoice', 'items' => [...]];
+    
+    $exporter = new DocumentExporter();
+    $content = $exporter->exportFromView('pdf', 'invoice', $data, [], $token);
+    
+    return response($content)
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', 'attachment; filename="invoice.pdf"');
+});
+```
+
+---
+
+## 🎨 Blade Template Support
+
+### Creating a Blade Template
+Create a view file at `resources/views/invoice.blade.php`:
+
+```blade
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style>
+        body { font-family: 'DejaVu Sans', sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>{{ $title }}</h1>
+    <p>Invoice #{{ $invoiceNumber }}</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($items as $item)
+            <tr>
+                <td>{{ $item['name'] }}</td>
+                <td>{{ $item['quantity'] }}</td>
+                <td>{{ $item['price'] }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    
+    <p><strong>Total: {{ $total }}</strong></p>
+</body>
+</html>
+```
+
+### Using the Template
+```php
+$exporter = new DocumentExporter();
+$content = $exporter->exportFromView('pdf', 'invoice', [
+    'title' => 'Sales Invoice',
+    'invoiceNumber' => 'INV-001',
+    'items' => [...],
+    'total' => 2000
+]);
+```
+
+### Benefits
+- **Custom Layouts**: Design complex documents with full HTML/CSS control
+- **Reusable Templates**: Share templates across your application
+- **Dynamic Content**: Use Blade directives (@if, @foreach, @include)
+- **Bangla Support**: Full Unicode support in templates
 
 ---
 
@@ -176,6 +286,25 @@ file_put_contents('bangla-report.pdf', $content);
 ## 📄 API Reference
 
 ### `DocumentExporter`
+
+#### `exportFromView(string $format, string $view, array $data = [], array $options = [], string $token = null): string`
+Generates PDF from Blade template (Laravel only).
+
+**Parameters:**
+- `$format` - Currently only `'pdf'` supported for views
+- `$view` - Blade view name (e.g., `'invoice'` for `resources/views/invoice.blade.php`)
+- `$data` - Data to pass to the Blade view
+- `$options` - Optional settings:
+  - `paper` - PDF paper size (A4, Letter, Legal)
+  - `orientation` - PDF orientation (portrait, landscape)
+  - `font` - PDF font (default: DejaVu Sans)
+- `$token` - Optional API token for validation
+
+**Returns:** PDF content as string
+
+**Throws:** `InvalidFormatException` or `InvalidTokenException`
+
+---
 
 #### `export(string $format, array $data, array $options = [], string $token = null): string`
 Generates document content and returns as string.

@@ -10,14 +10,25 @@ class PdfExporter implements ExporterInterface
 {
     public function export(array $data, array $options = []): string
     {
+        $html = $this->generateHtml($data, $options);
+        return $this->exportFromHtml($html, $options);
+    }
+
+    /**
+     * Export PDF from HTML content (for Blade templates)
+     * 
+     * @param string $html HTML content
+     * @param array $options Export options
+     * @return string PDF content
+     */
+    public function exportFromHtml(string $html, array $options = []): string
+    {
         $optionsDom = new Options();
         $optionsDom->set('isHtml5ParserEnabled', true);
         $optionsDom->set('isRemoteEnabled', true);
-        $optionsDom->set('defaultFont', $options['font'] ?? 'DejaVu Sans'); // DejaVu Sans supports Unicode
+        $optionsDom->set('defaultFont', $options['font'] ?? 'DejaVu Sans');
 
         $dompdf = new Dompdf($optionsDom);
-
-        $html = $this->generateHtml($data, $options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper($options['paper'] ?? 'A4', $options['orientation'] ?? 'portrait');
         $dompdf->render();

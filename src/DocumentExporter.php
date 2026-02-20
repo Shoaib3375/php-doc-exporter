@@ -45,6 +45,34 @@ class DocumentExporter
         return $exporter->export($data, $options);
     }
 
+    /**
+     * Export from Blade view template (Laravel only)
+     * 
+     * @param string $format Export format (pdf, excel, word, csv)
+     * @param string $view Blade view name
+     * @param array $data Data to pass to the view
+     * @param array $options Export options (paper, orientation, font)
+     * @param string|null $token Optional API token for validation
+     * @return string Generated document content
+     * @throws InvalidFormatException If format is not supported
+     * @throws InvalidTokenException If token validation fails
+     */
+    public function exportFromView(string $format, string $view, array $data = [], array $options = [], string $token = null): string
+    {
+        if ($token && !$this->config->canAccessSafeApi($token)) {
+            throw InvalidTokenException::invalid();
+        }
+
+        if ($format === 'pdf') {
+            $html = view($view, $data)->render();
+            $exporter = new PdfExporter();
+            return $exporter->exportFromHtml($html, $options);
+        }
+
+        // For non-PDF formats, fall back to array export
+        return $this->export($format, $data, $options, $token);
+    }
+
     protected function getExporter(string $format): ExporterInterface
     {
         return match (strtolower($format)) {

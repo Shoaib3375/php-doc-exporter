@@ -5,6 +5,11 @@ All notable changes to `php-doc-exporter` will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Blade Template Support**: New `exportFromView()` method for Laravel Blade templates
+- **HTML to PDF Export**: Direct HTML to PDF conversion with `exportFromHtml()` method
+- **API Integration Examples**: Complete API controller and route examples
+- **Comprehensive Documentation**: New BLADE_API_GUIDE.md with usage examples
+- **Example Templates**: Sample Blade templates for invoices and reports
 - Custom exception classes for better error handling
 - Laravel Service Provider for framework integration
 - Configuration file support with .env variables
@@ -14,6 +19,8 @@ All notable changes to `php-doc-exporter` will be documented in this file.
 - UTF-8 BOM for CSV Unicode support
 
 ### Changed
+- Refactored PdfExporter to separate HTML generation from PDF rendering
+- Enhanced README with Blade template usage and API examples
 - Removed hardcoded API tokens (security fix)
 - Tokens now configurable via environment variables
 - Improved error messages with specific exception types
