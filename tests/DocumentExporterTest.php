@@ -4,17 +4,21 @@ namespace Shoaib3375\PhpDocExporter\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Shoaib3375\PhpDocExporter\DocumentExporter;
-use InvalidArgumentException;
+use Shoaib3375\PhpDocExporter\Config;
+use Shoaib3375\PhpDocExporter\Exceptions\InvalidTokenException;
+use Shoaib3375\PhpDocExporter\Exceptions\EmptyDataException;
+use Shoaib3375\PhpDocExporter\Exceptions\InvalidFormatException;
 
 class DocumentExporterTest extends TestCase
 {
     private DocumentExporter $exporter;
-    private string $mainToken = '903352ea22c8ab26bf76ee18a452b3377d2a7d5c';
-    private string $safeToken = '5de6f212bc0320ed82a4eeb914115b9f450625f6';
+    private string $mainToken = 'test-main-token';
+    private string $safeToken = 'test-safe-token';
 
     protected function setUp(): void
     {
-        $this->exporter = new DocumentExporter();
+        $config = new Config($this->mainToken, $this->safeToken);
+        $this->exporter = new DocumentExporter($config);
     }
 
     public function testCsvExportWorksWithSafeToken()
@@ -33,15 +37,27 @@ class DocumentExporterTest extends TestCase
 
     public function testExportFailsWithWrongToken()
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->exporter->export('csv', [], [], 'wrong-token');
+        $this->expectException(InvalidTokenException::class);
+        $this->exporter->export('csv', [['test' => 'data']], [], 'wrong-token');
+    }
+
+    public function testExportFailsWithEmptyData()
+    {
+        $this->expectException(EmptyDataException::class);
+        $this->exporter->export('csv', []);
+    }
+
+    public function testExportFailsWithInvalidFormat()
+    {
+        $this->expectException(InvalidFormatException::class);
+        $this->exporter->export('invalid', [['test' => 'data']]);
     }
 
     public function testPackageCreationRequiresMainToken()
     {
         $this->assertTrue($this->exporter->createPackage('Test Package', $this->mainToken));
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidTokenException::class);
         $this->exporter->createPackage('Test Package', $this->safeToken);
     }
 
@@ -53,7 +69,6 @@ class DocumentExporterTest extends TestCase
 
     public function testBanglaUnicodeSupportInPdf()
     {
-        // This only checks if it runs without error, as parsing PDF content is complex
         $data = [['Name' => 'সোহেব', 'Email' => 'mesta@example.com']];
         $result = $this->exporter->export('pdf', $data, ['title' => 'Bangla রিপোর্ট'], $this->safeToken);
         $this->assertNotEmpty($result);

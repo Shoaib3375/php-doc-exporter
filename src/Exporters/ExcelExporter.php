@@ -14,14 +14,29 @@ class ExcelExporter implements ExporterInterface
         $sheet = $spreadsheet->getActiveSheet();
 
         if (!empty($data)) {
-            $headers = array_keys(reset($data));
+            $firstRow = reset($data);
+            $isAssociative = array_keys($firstRow) !== range(0, count($firstRow) - 1);
+
+            // Handle headers
             $col = 'A';
-            foreach ($headers as $header) {
-                $sheet->setCellValue($col . '1', $header);
-                $col++;
+            if ($isAssociative) {
+                $headers = array_keys($firstRow);
+                foreach ($headers as $header) {
+                    $sheet->setCellValue($col . '1', $header);
+                    $col++;
+                }
+                $rowIdx = 2;
+            } else {
+                // First row is headers
+                foreach ($firstRow as $header) {
+                    $sheet->setCellValue($col . '1', $header);
+                    $col++;
+                }
+                array_shift($data);
+                $rowIdx = 2;
             }
 
-            $rowIdx = 2;
+            // Handle data rows
             foreach ($data as $row) {
                 $col = 'A';
                 foreach ($row as $cell) {

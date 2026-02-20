@@ -8,35 +8,39 @@ use Shoaib3375\PhpDocExporter\Config;
 class ConfigTest extends TestCase
 {
     private Config $config;
+    private string $mainToken = 'test-main-token';
+    private string $safeToken = 'test-safe-token';
 
     protected function setUp(): void
     {
-        $this->config = new Config();
+        $this->config = new Config($this->mainToken, $this->safeToken);
     }
 
     public function testTokensAreCorrect()
     {
-        $this->assertEquals('903352ea22c8ab26bf76ee18a452b3377d2a7d5c', $this->config->getMainApiToken());
-        $this->assertEquals('5de6f212bc0320ed82a4eeb914115b9f450625f6', $this->config->getSafeApiToken());
+        $this->assertEquals($this->mainToken, $this->config->getMainApiToken());
+        $this->assertEquals($this->safeToken, $this->config->getSafeApiToken());
     }
 
     public function testCanAccessFullApi()
     {
-        $mainToken = '903352ea22c8ab26bf76ee18a452b3377d2a7d5c';
-        $safeToken = '5de6f212bc0320ed82a4eeb914115b9f450625f6';
-
-        $this->assertTrue($this->config->canAccessFullApi($mainToken));
-        $this->assertFalse($this->config->canAccessFullApi($safeToken));
+        $this->assertTrue($this->config->canAccessFullApi($this->mainToken));
+        $this->assertFalse($this->config->canAccessFullApi($this->safeToken));
         $this->assertFalse($this->config->canAccessFullApi('wrong-token'));
     }
 
     public function testCanAccessSafeApi()
     {
-        $mainToken = '903352ea22c8ab26bf76ee18a452b3377d2a7d5c';
-        $safeToken = '5de6f212bc0320ed82a4eeb914115b9f450625f6';
-
-        $this->assertTrue($this->config->canAccessSafeApi($mainToken));
-        $this->assertTrue($this->config->canAccessSafeApi($safeToken));
+        $this->assertTrue($this->config->canAccessSafeApi($this->mainToken));
+        $this->assertTrue($this->config->canAccessSafeApi($this->safeToken));
         $this->assertFalse($this->config->canAccessSafeApi('wrong-token'));
+    }
+
+    public function testHasTokens()
+    {
+        $this->assertTrue($this->config->hasTokens());
+        
+        $emptyConfig = new Config('', '');
+        $this->assertFalse($emptyConfig->hasTokens());
     }
 }

@@ -6,7 +6,9 @@ use Shoaib3375\PhpDocExporter\Exporters\PdfExporter;
 use Shoaib3375\PhpDocExporter\Exporters\ExcelExporter;
 use Shoaib3375\PhpDocExporter\Exporters\WordExporter;
 use Shoaib3375\PhpDocExporter\Exporters\CsvExporter;
-use InvalidArgumentException;
+use Shoaib3375\PhpDocExporter\Exceptions\InvalidFormatException;
+use Shoaib3375\PhpDocExporter\Exceptions\EmptyDataException;
+use Shoaib3375\PhpDocExporter\Exceptions\InvalidTokenException;
 
 class DocumentExporter
 {
@@ -18,17 +20,25 @@ class DocumentExporter
     }
 
     /**
-     * @param string $format
-     * @param array $data
-     * @param array $options
-     * @param string|null $token
-     * @return string
-     * @throws InvalidArgumentException
+     * Export data to specified format
+     * 
+     * @param string $format Export format (pdf, excel, word, csv)
+     * @param array $data Associative array of data to export
+     * @param array $options Export options (title, paper, orientation, font)
+     * @param string|null $token Optional API token for validation
+     * @return string Generated document content
+     * @throws EmptyDataException If data array is empty
+     * @throws InvalidFormatException If format is not supported
+     * @throws InvalidTokenException If token validation fails
      */
     public function export(string $format, array $data, array $options = [], string $token = null): string
     {
+        if (empty($data)) {
+            throw EmptyDataException::noData();
+        }
+
         if ($token && !$this->config->canAccessSafeApi($token)) {
-            throw new InvalidArgumentException("Invalid or insufficient API token.");
+            throw InvalidTokenException::invalid();
         }
 
         $exporter = $this->getExporter($format);
@@ -42,38 +52,58 @@ class DocumentExporter
             'excel', 'xlsx' => new ExcelExporter(),
             'word', 'docx' => new WordExporter(),
             'csv' => new CsvExporter(),
-            default => throw new InvalidArgumentException("Unsupported format: {$format}"),
+            default => throw InvalidFormatException::unsupported($format),
         };
     }
 
     /**
-     * These methods represent the "Full APIs" that require the main token
+     * Create a new package (requires main token)
+     * 
+     * @param string $name Package name
+     * @param string $token API token
+     * @return bool
+     * @throws InvalidTokenException If main token is not provided
      */
     public function createPackage(string $name, string $token): bool
     {
         if (!$this->config->canAccessFullApi($token)) {
-            throw new InvalidArgumentException("Main API token required for package creation.");
+            throw InvalidTokenException::mainRequired();
         }
         // Logic for package creation
         return true;
     }
 
+    /**
+     * Edit an existing package (requires main token)
+     * 
+     * @param string $id Package ID
+     * @param array $data Package data
+     * @param string $token API token
+     * @return bool
+     * @throws InvalidTokenException If main token is not provided
+     */
     public function editPackage(string $id, array $data, string $token): bool
     {
         if (!$this->config->canAccessFullApi($token)) {
-            throw new InvalidArgumentException("Main API token required for package edit.");
+            throw InvalidTokenException::mainRequired();
         }
         // Logic for package edit
         return true;
     }
 
     /**
-     * This represents a "Safe API"
+     * Update a package (requires safe or main token)
+     * 
+     * @param string $id Package ID
+     * @param array $data Package data
+     * @param string $token API token
+     * @return bool
+     * @throws InvalidTokenException If valid token is not provided
      */
     public function updatePackage(string $id, array $data, string $token): bool
     {
         if (!$this->config->canAccessSafeApi($token)) {
-            throw new InvalidArgumentException("Valid API token required for package update.");
+            throw InvalidTokenException::invalid();
         }
         // Logic for package update
         return true;

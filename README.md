@@ -21,79 +21,154 @@ You can install the package via composer:
 composer require shoaib3375/php-doc-exporter
 ```
 
-## 📖 Usage in Laravel
+### Laravel Setup (Optional)
 
-### 1. Basic Export in a Controller
-Generate any format and return it as a download response.
+The package auto-registers in Laravel. Optionally publish the config:
 
+```bash
+php artisan vendor:publish --provider="Shoaib3375\PhpDocExporter\PhpDocExporterServiceProvider"
+```
+
+Then configure tokens in `.env`:
+```env
+PHP_DOC_EXPORTER_MAIN_TOKEN=your-main-token
+PHP_DOC_EXPORTER_SAFE_TOKEN=your-safe-token
+```
+
+## 📖 Quick Start
+
+### Basic Usage (Plain PHP)
+```php
+use Shoaib3375\PhpDocExporter\DocumentExporter;
+
+$data = [
+    ['name' => 'Shoaib', 'age' => 25, 'city' => 'Dhaka'],
+    ['name' => 'মাইনুল', 'age' => 30, 'city' => 'Sylhet']
+];
+
+$exporter = new DocumentExporter();
+$content = $exporter->export('pdf', $data);
+
+// Save to file
+file_put_contents('report.pdf', $content);
+```
+
+### Laravel Controller Example
 ```php
 use Shoaib3375\PhpDocExporter\DocumentExporter;
 use Illuminate\Http\Request;
 
-public function exportData(Request $request)
+public function export(Request $request)
 {
     $data = [
-        ['Name', 'Age', 'City'],
-        ['Shoaib', 25, 'Dhaka'],
-        ['মাইনুল', 30, 'Sylhet']
+        ['name' => 'Shoaib', 'age' => 25, 'city' => 'Dhaka'],
+        ['name' => 'মাইনুল', 'age' => 30, 'city' => 'Sylhet']
     ];
 
     $exporter = new DocumentExporter();
+    $format = $request->input('format', 'pdf'); // pdf, excel, word, csv
     
-    // Formats supported: 'pdf', 'excel', 'word', 'csv'
-    $format = $request->input('format', 'pdf'); 
-    $fileName = 'report_' . time() . '.' . $this->getExtension($format);
-    $filePath = storage_path('app/public/' . $fileName);
-
-    $exporter->export($format, $data, $filePath);
-
-    return response()->download($filePath)->deleteFileAfterSend(true);
+    $content = $exporter->export($format, $data);
+    
+    $extension = match($format) {
+        'excel' => 'xlsx',
+        'word' => 'docx',
+        default => $format
+    };
+    
+    return response($content)
+        ->header('Content-Type', $this->getMimeType($format))
+        ->header('Content-Disposition', 'attachment; filename="report.' . $extension . '"');
 }
 
-private function getExtension($format) {
+private function getMimeType($format) {
     return match($format) {
-        'excel' => 'xlsx',
-        'word'  => 'docx',
-        default => $format
+        'pdf' => 'application/pdf',
+        'excel' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'word' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'csv' => 'text/csv',
     };
 }
 ```
 
 ---
 
-## 🔒 Security & API Tokens (Optional)
-The package includes an **optional** `Config` class for API token authentication. This is only needed if you're exposing document generation through an API and want to control access.
+## 🎨 Advanced Options
 
+### PDF Customization
+```php
+$options = [
+    'title' => 'Sales Report',
+    'paper' => 'A4',           // A4, Letter, Legal
+    'orientation' => 'landscape', // portrait or landscape
+    'font' => 'DejaVu Sans'    // Default font for Unicode support
+];
 
-### Usage
+$content = $exporter->export('pdf', $data, $options);
+```
+
+### Word/Excel Customization
+```php
+$options = [
+    'title' => 'Monthly Report'
+];
+
+$content = $exporter->export('word', $data, $options);
+```
+
+### Data Format
+Use **associative arrays** where keys become column headers:
+```php
+$data = [
+    ['name' => 'John', 'email' => 'john@example.com'],
+    ['name' => 'জন', 'email' => 'john@example.bd']
+];
+```
+
+---
+
+## 🔒 API Token Security (Optional)
+
+### Using Tokens for Protected Exports
+```php
+$exporter = new DocumentExporter();
+
+// Export with token validation
+$content = $exporter->export('pdf', $data, [], $apiToken);
+// Throws InvalidArgumentException if token is invalid
+```
+
+### Custom Token Configuration
 ```php
 use Shoaib3375\PhpDocExporter\Config;
 
 $config = new Config();
 
-// Check if a token has full access (package create, edit, update)
-if ($config->canAccessFullApi($providedToken)) {
-    // Logic for main token
+// Validate tokens
+if ($config->canAccessFullApi($token)) {
+    // Full access: create, edit, update
 }
 
-// Check if a token has safe access (package update, export)
-if ($config->canAccessSafeApi($providedToken)) {
-    // Logic for safe token
+if ($config->canAccessSafeApi($token)) {
+    // Safe access: export only
 }
 ```
 
 ---
 
 ## 🇧🇩 Bangla Unicode Support
-PDF generation in PHP often fails with Bangla characters (appearing as boxes or question marks). This package is pre-configured to use the `DejaVu Sans` font which renders Bangla correctly.
+All formats (PDF, Excel, Word, CSV) fully support Bangla and other Unicode characters.
 
-**Example Data:**
+**PDF** uses `DejaVu Sans` font by default to render Bangla correctly (no boxes or question marks).
+
 ```php
 $data = [
-    ['নাম', 'বয়স'],
-    ['শোয়েব', '২৫'],
-    ['মাইনুল', '৩০']
+    ['নাম' => 'শোয়েব', 'বয়স' => '২৫', 'শহর' => 'ঢাকা'],
+    ['নাম' => 'মাইনুল', 'বয়স' => '৩০', 'শহর' => 'সিলেট']
 ];
+
+$content = $exporter->export('pdf', $data);
+file_put_contents('bangla-report.pdf', $content);
 ```
 
 ---
@@ -101,17 +176,34 @@ $data = [
 ## 📄 API Reference
 
 ### `DocumentExporter`
-| Method | Description |
-| :--- | :--- |
-| `export(string $type, array $data, string $outputPath)` | Generates the document based on type and saves to path. |
+
+#### `export(string $format, array $data, array $options = [], string $token = null): string`
+Generates document content and returns as string.
+
+**Parameters:**
+- `$format` - Format type: `'pdf'`, `'excel'`, `'word'`, `'csv'`
+- `$data` - Associative array of data (keys = headers)
+- `$options` - Optional settings:
+  - `title` - Document title
+  - `paper` - PDF paper size (A4, Letter, Legal)
+  - `orientation` - PDF orientation (portrait, landscape)
+  - `font` - PDF font (default: DejaVu Sans)
+- `$token` - Optional API token for validation
+
+**Returns:** Document content as string
+
+**Throws:** `InvalidArgumentException` for invalid format or token
+
+---
 
 ### `Config`
+
 | Method | Description |
 | :--- | :--- |
-| `getMainApiToken()` | Returns the primary secret token. |
-| `getSafeApiToken()` | Returns the secondary less-sensitive token. |
-| `canAccessFullApi(string $token)` | Returns true if token matches main token. |
-| `canAccessSafeApi(string $token)` | Returns true if token matches either main or safe token. |
+| `canAccessFullApi(string $token): bool` | Validates main API token |
+| `canAccessSafeApi(string $token): bool` | Validates safe or main token |
+| `getMainApiToken(): string` | Returns primary token |
+| `getSafeApiToken(): string` | Returns secondary token |
 
 ---
 

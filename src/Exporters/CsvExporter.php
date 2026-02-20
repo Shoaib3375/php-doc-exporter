@@ -23,6 +23,6 @@ class CsvExporter implements ExporterInterface
         $content = stream_get_contents($output);
         fclose($output);
 
-        return $content;
+        return "\xEF\xBB\xBF" . $content;
     }
 }
