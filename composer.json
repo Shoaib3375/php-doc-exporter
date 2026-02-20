@@ -33,13 +33,15 @@
     "minimum-stability": "stable",
     "require": {
         "php": "^8.1",
-        "illuminate/support": "^10.0|^11.0",
         "dompdf/dompdf": "^2.0",
         "phpoffice/phpspreadsheet": "^1.28",
         "phpoffice/phpword": "^1.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0"
+    },
+    "suggest": {
+        "illuminate/support": "Required for Laravel integration and Blade template support (^10.0|^11.0)"
     },
     "extra": {
         "laravel": {
