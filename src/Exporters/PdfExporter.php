@@ -32,22 +32,32 @@ class PdfExporter implements ExporterInterface
         $html .= 'body { font-family: "DejaVu Sans", sans-serif; }';
         $html .= 'table { width: 100%; border-collapse: collapse; }';
         $html .= 'th, td { border: 1px solid #000; padding: 8px; text-align: left; }';
+        $html .= 'thead { background-color: #f2f2f2; }';
         $html .= '</style></head><body>';
         $html .= "<h1>{$title}</h1>";
         $html .= '<table>';
 
         if (!empty($data)) {
-            $headers = array_keys(reset($data));
+            $firstRow = reset($data);
+            $isAssociative = array_keys($firstRow) !== range(0, count($firstRow) - 1);
+
             $html .= '<thead><tr>';
-            foreach ($headers as $header) {
-                $html .= "<th>{$header}</th>";
+            if ($isAssociative) {
+                foreach (array_keys($firstRow) as $header) {
+                    $html .= "<th>" . htmlspecialchars($header) . "</th>";
+                }
+            } else {
+                foreach ($firstRow as $header) {
+                    $html .= "<th>" . htmlspecialchars($header) . "</th>";
+                }
+                array_shift($data); // Remove the header row from data
             }
             $html .= '</tr></thead><tbody>';
 
             foreach ($data as $row) {
                 $html .= '<tr>';
                 foreach ($row as $cell) {
-                    $html .= "<td>{$cell}</td>";
+                    $html .= "<td>" . htmlspecialchars($cell) . "</td>";
                 }
                 $html .= '</tr>';
             }
