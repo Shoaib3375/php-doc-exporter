@@ -41,6 +41,14 @@ class DocumentExporter
             throw InvalidTokenException::invalid();
         }
 
+        // Auto-detect Bangla for Excel/Word exports
+        $formatLower = strtolower($format);
+        if (in_array($formatLower, ['excel', 'xlsx', 'word', 'docx'], true)) {
+            if (PdfExporter::isBangla($data)) {
+                $options['unicode'] = true;
+            }
+        }
+
         $exporter = $this->getExporter($format);
         return $exporter->export($data, $options);
     }

@@ -36,8 +36,7 @@ class PdfExporter implements ExporterInterface
 
     /**
      * Path to the bundled fonts directory inside this package.
-     * Composer installs the package at vendor/shoaib3375/php-doc-exporter,
-     * so __DIR__ points to src/Exporters/ → go one level up → fonts/.
+     * __DIR__ points to src/Exporters/ → go one level up → fonts/.
      */
     private const FONTS_DIR = __DIR__ . '/../fonts/';
 
