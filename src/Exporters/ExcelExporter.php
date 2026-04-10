@@ -13,6 +13,11 @@ class ExcelExporter implements ExporterInterface
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
+        // Set spreadsheet properties for Unicode
+        $spreadsheet->getProperties()
+            ->setCreator('php-doc-exporter')
+            ->setTitle($options['title'] ?? 'Report');
+
         if (!empty($data)) {
             $firstRow = reset($data);
             $isAssociative = array_keys($firstRow) !== range(0, count($firstRow) - 1);
@@ -45,7 +50,17 @@ class ExcelExporter implements ExporterInterface
                 }
                 $rowIdx++;
             }
+
+            // Auto-size all columns (Bangla chars are wider)
+            foreach ($sheet->getColumnIterator() as $column) {
+                $sheet->getColumnDimension($column->getColumnIndex())
+                    ->setAutoSize(true);
+            }
         }
+
+        // Explicitly set default style font to support Unicode
+        $spreadsheet->getDefaultStyle()->getFont()->setName('Calibri');
+        $spreadsheet->getDefaultStyle()->getFont()->setSize(12);
 
         $writer = new Xlsx($spreadsheet);
         

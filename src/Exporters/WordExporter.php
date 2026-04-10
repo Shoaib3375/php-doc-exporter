@@ -4,6 +4,7 @@ namespace Shoaib3375\PhpDocExporter\Exporters;
 
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\Style\Language;
 use Shoaib3375\PhpDocExporter\ExporterInterface;
 
 class WordExporter implements ExporterInterface
@@ -11,6 +12,14 @@ class WordExporter implements ExporterInterface
     public function export(array $data, array $options = []): string
     {
         $phpWord = new PhpWord();
+
+        // Set Bengali locale and default font for Bangla support
+        $phpWord->getSettings()->setThemeFontLang(
+            new Language(Language::BN_BN)
+        );
+        $phpWord->setDefaultFontName('Vrinda');
+        $phpWord->setDefaultFontSize(12);
+
         $section = $phpWord->addSection();
 
         $title = $options['title'] ?? 'Document';
@@ -22,13 +31,21 @@ class WordExporter implements ExporterInterface
             $headers = array_keys(reset($data));
             $table->addRow();
             foreach ($headers as $header) {
-                $table->addCell(2000)->addText($header, ['bold' => true]);
+                $table->addCell(2000)->addText(
+                    $header,
+                    ['name' => 'Vrinda', 'size' => 11, 'bold' => true],
+                    ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT]
+                );
             }
 
             foreach ($data as $row) {
                 $table->addRow();
                 foreach ($row as $cell) {
-                    $table->addCell(2000)->addText((string)$cell);
+                    $table->addCell(2000)->addText(
+                        (string)$cell,
+                        ['name' => 'Vrinda', 'size' => 11],
+                        ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT]
+                    );
                 }
             }
         }
