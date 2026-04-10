@@ -2,6 +2,32 @@
 
 All notable changes to `php-doc-exporter` will be documented in this file.
 
+## [1.2.0] - 2026-04-11
+
+### Added
+- Bundled NotoSansBengali-Regular.ttf and NotoSansBengali-Bold.ttf fonts inside package
+- Auto-detection of Bangla Unicode in data arrays and HTML strings (no config needed)
+- `PdfExporter::isBangla()` public static helper method
+- Runtime Dompdf font registration for bundled Bangla fonts
+- Automatic `@font-face` CSS injection for Blade template exports
+- UTF-8 BOM ensured for CSV exports (fixes Excel Bangla rendering)
+- Bengali locale setting for Word exports
+- Auto-sizing columns in Excel for Bangla content
+- New test: `tests/BanglaFontTest.php`
+
+### Changed
+- `PdfExporter` no longer defaults to DejaVu Sans when Bangla is detected
+- Font resolution priority: explicit option → auto-detected Bangla → DejaVu Sans
+- `DocumentExporter` no longer passes hardcoded font to PdfExporter
+
+### Fixed
+- Bangla text showing as boxes (□□□) in generated PDFs
+- Bangla column headers not displaying in Excel
+- Word documents not opening correctly with Bangla content on Windows
+
+### Breaking Changes
+- None. All existing method signatures unchanged.
+
 ## [Unreleased]
 
 ### Added

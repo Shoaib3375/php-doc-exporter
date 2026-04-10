@@ -79,7 +79,7 @@ class PdfExporter implements ExporterInterface
      */
     public static function isBangla(string|array $content): bool
     {
-        $text = is_array($content) ? json_encode($content) : $content;
+        $text = is_array($content) ? json_encode($content, JSON_UNESCAPED_UNICODE) : $content;
         return (bool) preg_match(self::BANGLA_REGEX, $text);
     }
 
@@ -253,7 +253,7 @@ HTML;
         }
 
         // 2. Auto-detect Bangla
-        $sniffTarget = $htmlContent ?? (!empty($data) ? json_encode($data) : '');
+        $sniffTarget = $htmlContent ?? (!empty($data) ? json_encode($data, JSON_UNESCAPED_UNICODE) : '');
         if ($sniffTarget !== '' && self::isBangla($sniffTarget)) {
             return self::BANGLA_FONT_NAME;
         }

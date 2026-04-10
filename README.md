@@ -7,7 +7,7 @@ An all-in-one PHP/Laravel library to generate professional documents in **PDF, E
 
 ## 🚀 Features
 - **Blade Template Support**: Use Laravel Blade views for custom PDF layouts
-  - **Bangla Support**: Seamlessly handles Bangla Unicode characters in PDFs using `DejaVu Sans`.
+  - **Bangla Support**: Auto-detects Bangla Unicode and switches to bundled NotoSansBengali font automatically.
   - **Multi-Format**: One interface for 4 major document types.
   - **Secure**: Built-in logic for Main and Safe API tokens for external integrations.
   - **Performant**: Optimized for speed and minimal memory footprint.
@@ -211,7 +211,7 @@ $options = [
     'title' => 'Sales Report',
     'paper' => 'A4',           // A4, Letter, Legal
     'orientation' => 'landscape', // portrait or landscape
-    'font' => 'DejaVu Sans'    // Default font for Unicode support
+    'font' => 'NotoSansBengali' // Optional: override auto-detected font
 ];
 
 $content = $exporter->export('pdf', $data, $options);
@@ -267,32 +267,30 @@ if ($config->canAccessSafeApi($token)) {
 ---
 
 ## 🇧🇩 Bangla Unicode Support
-All formats (PDF, Excel, Word, CSV) fully support Bangla and other Unicode characters.
 
-**Important:** For full Bangla support in PDFs, use a dedicated Bangla font like **Noto Sans Bengali**, **Kalpurush**, or **SolaimanLipi**. The default `DejaVu Sans` has limited Bangla character support.
+All formats support Bangla Unicode **automatically** — no configuration needed.
 
-### Recommended Usage
+The package detects Bangla characters in your data and applies the correct font.
+
+### PDF
+Bangla font (NotoSansBengali) is bundled inside the package — no manual font installation required.
+
 ```php
 $data = [
     ['নাম' => 'শোয়েব', 'বয়স' => '২৫', 'শহর' => 'ঢাকা'],
-    ['নাম' => 'মাইনুল', 'বয়স' => '৩০', 'শহর' => 'সিলেট']
 ];
-
-// Specify a Bangla-compatible font
-$content = $exporter->export('pdf', $data, [
-    'font' => 'Noto Sans Bengali'  // or 'Kalpurush', 'SolaimanLipi'
-]);
-file_put_contents('bangla-report.pdf', $content);
+$pdf = $exporter->export('pdf', $data); // font is chosen automatically
 ```
 
-### In Blade Templates
-```blade
-<style>
-    body { font-family: 'Noto Sans Bengali', sans-serif; }
-</style>
-```
+### Excel / Word / CSV
+These formats use Unicode-native libraries and work out of the box.
 
-> **Note:** See [BANGLA_FONT_GUIDE.md](BANGLA_FONT_GUIDE.md) for detailed font installation and configuration instructions.
+### Manual font override (optional)
+If you need a specific font, you can still pass it explicitly:
+
+```php
+$pdf = $exporter->export('pdf', $data, ['font' => 'Kalpurush']);
+```
 
 ---
 
@@ -310,7 +308,7 @@ Generates PDF from Blade template (Laravel only).
   - `$options` - Optional settings:
     - `paper` - PDF paper size (A4, Letter, Legal)
     - `orientation` - PDF orientation (portrait, landscape)
-    - `font` - PDF font (default: DejaVu Sans)
+    - `font` - PDF font (auto-detected: Bangla → NotoSansBengali, else DejaVu Sans)
   - `$token` - Optional API token for validation
 
 **Returns:** PDF content as string
@@ -329,7 +327,7 @@ Generates document content and returns as string.
     - `title` - Document title
     - `paper` - PDF paper size (A4, Letter, Legal)
     - `orientation` - PDF orientation (portrait, landscape)
-    - `font` - PDF font (default: DejaVu Sans)
+    - `font` - PDF font (auto-detected: Bangla → NotoSansBengali, else DejaVu Sans)
   - `$token` - Optional API token for validation
 
 **Returns:** Document content as string

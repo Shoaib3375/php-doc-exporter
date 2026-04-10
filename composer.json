@@ -3,6 +3,7 @@
     "description": "All-in-one Laravel document exporter",
     "type": "library",
     "license": "MIT",
+    "version": "1.2.0",
     "keywords": [
         "laravel",
         "php",
